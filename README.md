@@ -34,15 +34,6 @@ The algorithmic reasoning, comparisons, and performance metrics are documented i
 - **Admin Panel:** Seed the database with sample users, items, and interaction datasets.
 - **Interactive Dashboard:** Select users to view their personalized movie suggestions.
 
-## Planned Enhancements (UI/UX)
-
-The frontend interface is slated for modern and elegant UI/UX improvements, including:
-- Displaying the underlying reasoning for the chosen algorithm directly on the UI (based on notebook findings).
-- Showcasing the comparison matrix from the research phase.
-- Displaying detailed user preferences and information from the dataset for the selected user.
-- Adding a search bar alongside the dropdown for an enhanced user selection experience.
-- Overhauling the visual aesthetics to meet modern design standards.
-
 ## Setup Instructions
 
 ### Backend

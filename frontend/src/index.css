@@ -1,0 +1,25 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply font-sans antialiased text-gray-800;
+    font-family: 'Inter', sans-serif;
+    /* Soft light gradient background */
+    background: linear-gradient(135deg, #f0f4f8 0%, #e2e8f0 100%);
+    min-height: 100vh;
+  }
+}
+
+@layer components {
+  .glass-card {
+    @apply bg-white/70 backdrop-blur-md border border-white/40 shadow-sm rounded-xl;
+  }
+  
+  .glass-card-hover {
+    @apply transition-all duration-300 hover:shadow-md hover:-translate-y-1 hover:bg-white/80;
+  }
+}

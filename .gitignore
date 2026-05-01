@@ -1,0 +1,7 @@
+backend/__pycache__
+.movie_recommendor_env
+backend/.env
+
+frontend/.vite
+frontend/node_modules
+frontend/.DS_Store
