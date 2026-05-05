@@ -6,10 +6,14 @@ router = APIRouter()
 
 
 @router.post("/interactions", status_code=201)
-async def create_interaction(payload: Interaction):
+async def create_interaction(payload: Interaction, request: Request):
     db = get_db()
     doc = payload.dict()
     await db.interactions.insert_one(doc)
+    # Schedule rebuild in background without blocking
+    recommender = request.app.state.recommender
+    if recommender:
+        recommender.schedule_rebuild()
     return {"status": "ok"}
 
 
@@ -29,6 +33,7 @@ async def recommend(user_id: int, request: Request, top_n: int = 5):
     recommender = request.app.state.recommender
     if not recommender:
         raise HTTPException(status_code=500, detail="Recommender not initialized")
+    # This will wait for any in-flight rebuild before proceeding
     recs = await recommender.recommend(user_id, top_n=top_n)
     db = get_db()
     interaction_count = await db.interactions.count_documents({"user_id": user_id})

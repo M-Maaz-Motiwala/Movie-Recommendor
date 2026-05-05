@@ -11,6 +11,7 @@ export default function App() {
   const [selected, setSelected] = useState(null);
   const [recs, setRecs] = useState([]);
   const [interactionCount, setInteractionCount] = useState(null);
+  const [userInteractions, setUserInteractions] = useState([]);
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -29,6 +30,20 @@ export default function App() {
       setInteractionCount(0);
     }
     setLoading(false);
+  };
+
+  const fetchUserInteractions = async (userId) => {
+    if (!userId) {
+      setUserInteractions([]);
+      return;
+    }
+    try {
+      const res = await api.get('/interactions');
+      const interactions = res.data.filter(item => item.user_id === userId && item.rating != null);
+      setUserInteractions(interactions);
+    } catch (e) {
+      setUserInteractions([]);
+    }
   };
 
   const refreshUsers = () => {
@@ -61,6 +76,7 @@ export default function App() {
                 setSelected(u);
                 setRecs([]); // clear previous recs on user change
                 setInteractionCount(null);
+                fetchUserInteractions(u?.user_id);
               }} 
               onGet={() => fetchRecs(selected?.user_id)} 
             />
@@ -82,7 +98,11 @@ export default function App() {
             items={recs} 
             loading={loading} 
             userId={selected?.user_id}
-            onRefresh={() => fetchRecs(selected?.user_id)}
+            userInteractions={userInteractions}
+            onRefresh={() => {
+              fetchUserInteractions(selected?.user_id);
+              fetchRecs(selected?.user_id);
+            }}
           />
           
           <AlgorithmInsights interactionCount={interactionCount} />

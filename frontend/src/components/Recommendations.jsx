@@ -1,8 +1,22 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import api from '../services/api';
 
-export default function Recommendations({ items, loading, userId, onRefresh }) {
+export default function Recommendations({ items, loading, userId, onRefresh, userInteractions = [] }) {
   const [ratingStates, setRatingStates] = useState({}); // { itemId: { rating: 5, loading: false, success: false } }
+
+  useEffect(() => {
+    const nextStates = {};
+    userInteractions.forEach(interaction => {
+      if (interaction?.item_id != null && interaction?.rating != null) {
+        nextStates[interaction.item_id] = {
+          rating: interaction.rating,
+          loading: false,
+          success: true,
+        };
+      }
+    });
+    setRatingStates(nextStates);
+  }, [userInteractions]);
 
   const handleRate = async (itemId, rating) => {
     if (!userId) return;
@@ -24,9 +38,6 @@ export default function Recommendations({ items, loading, userId, onRefresh }) {
         ...prev,
         [itemId]: { loading: false, success: true, rating }
       }));
-
-      // Optionally refresh after a delay
-      if (onRefresh) setTimeout(onRefresh, 1500);
     } catch (err) {
       console.error("Rating failed", err);
       setRatingStates(prev => ({

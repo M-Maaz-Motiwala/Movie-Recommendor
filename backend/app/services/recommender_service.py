@@ -7,6 +7,7 @@ class RecommenderService:
     def __init__(self):
         self.recommender: Recommender = None
         self._lock = asyncio.Lock()
+        self._rebuild_task = None
 
     async def initialize(self, rebuild: bool = False):
         async with self._lock:
@@ -15,9 +16,28 @@ class RecommenderService:
                 self.recommender = Recommender(db)
                 await self.recommender.fit_from_db()
 
+    def schedule_rebuild(self):
+        """Schedule a background rebuild without blocking."""
+        try:
+            self._rebuild_task = asyncio.create_task(self.initialize(rebuild=True))
+        except RuntimeError:
+            # If no event loop, fall back to sync initialize
+            pass
+
+    async def wait_for_rebuild(self):
+        """Wait for any in-flight rebuild to complete."""
+        if self._rebuild_task and not self._rebuild_task.done():
+            try:
+                await self._rebuild_task
+            except Exception:
+                pass  # Ignore errors, recommender is still usable
+
     async def recommend(self, user_id: int, top_n: int = 5):
+        # Wait for any in-flight rebuild before serving recommendations
+        await self.wait_for_rebuild()
         # returns list of dicts
         return await self.recommender.recommend(user_id, top_n=top_n)
 
     async def similar_items(self, item_id: int, top_n: int = 5):
+        await self.wait_for_rebuild()
         return await self.recommender.similar_items(item_id, top_n=top_n)
