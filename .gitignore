@@ -1,8 +1,13 @@
+# Python cache directories (recursive)
+__pycache__/
+**/__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
 backend/__pycache__
 .movie_recommendor_env
 backend/.env
-
-__pycache__/*
 
 frontend/.vite
 frontend/node_modules
