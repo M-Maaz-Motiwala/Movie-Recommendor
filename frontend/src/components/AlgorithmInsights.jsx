@@ -1,23 +1,36 @@
 import React from 'react';
 
-export default function AlgorithmInsights({ interactionCount }) {
-  let activeAlgo = "none";
-  let statusText = "Awaiting User Selection";
-  let statusColor = "bg-gray-100 text-gray-600";
+export default function AlgorithmInsights({ interactionCount, strategy }) {
+  const derivedAlgo =
+    strategy ||
+    (interactionCount == null
+      ? 'none'
+      : interactionCount <= 5
+        ? 'demographic'
+        : interactionCount < 20
+        ? 'content'
+        : interactionCount <= 70
+          ? 'svd'
+          : 'collaborative');
 
-  if (interactionCount !== null) {
-    if (interactionCount < 20) {
-      activeAlgo = "content";
-      statusText = "Threshold 1: < 20 Ratings (Cold Start)";
-      statusColor = "bg-blue-100 text-blue-700";
-    } else if (interactionCount <= 70) {
-      activeAlgo = "svd";
-      statusText = "Threshold 2: 20-70 Ratings (Moderate)";
-      statusColor = "bg-purple-100 text-purple-700";
-    } else {
-      activeAlgo = "collaborative";
-      statusText = "Threshold 3: > 70 Ratings (Established)";
-      statusColor = "bg-teal-100 text-teal-700";
+  let activeAlgo = derivedAlgo;
+  let statusText = 'Awaiting User Selection';
+  let statusColor = 'bg-gray-100 text-gray-600';
+
+  if (interactionCount !== null || strategy) {
+    if (activeAlgo === 'demographic') {
+      statusText = 'Backend Strategy: Demographic Cold Start';
+      statusColor = 'bg-amber-100 text-amber-700';
+    } else
+    if (activeAlgo === 'content') {
+      statusText = 'Backend Strategy: Content-Based (Cold Start)';
+      statusColor = 'bg-blue-100 text-blue-700';
+    } else if (activeAlgo === 'svd') {
+      statusText = 'Backend Strategy: SVD Matrix Factorization';
+      statusColor = 'bg-purple-100 text-purple-700';
+    } else if (activeAlgo === 'collaborative') {
+      statusText = 'Backend Strategy: Collaborative Filtering';
+      statusColor = 'bg-teal-100 text-teal-700';
     }
   }
 
@@ -62,29 +75,38 @@ export default function AlgorithmInsights({ interactionCount }) {
           </div>
           
           <ul className="space-y-4 text-sm mt-4">
+            <li className={`flex items-start p-3 rounded-lg border ${activeAlgo === 'demographic' ? 'bg-amber-50/50 border-amber-200' : 'border-transparent opacity-60'}`}>
+              <span className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center mr-3 mt-0.5 font-bold ${activeAlgo === 'demographic' ? 'bg-amber-100 text-amber-600' : 'bg-gray-100 text-gray-500'}`}>1</span>
+              <div>
+                <strong className={`block ${activeAlgo === 'demographic' ? 'text-amber-900' : 'text-gray-700'}`}>Demographic Cold Start</strong>
+                <span className="text-gray-600 block mt-1"><strong>Reason:</strong> Backend selects this when the user has 0-5 interactions.</span>
+                <span className="text-gray-600 block"><strong>Action:</strong> Uses age, gender, and occupation to find similar users.</span>
+              </div>
+            </li>
+
             <li className={`flex items-start p-3 rounded-lg border ${activeAlgo === 'content' ? 'bg-blue-50/50 border-blue-200' : 'border-transparent opacity-60'}`}>
-              <span className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center mr-3 mt-0.5 font-bold ${activeAlgo === 'content' ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-500'}`}>1</span>
+              <span className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center mr-3 mt-0.5 font-bold ${activeAlgo === 'content' ? 'bg-blue-100 text-blue-600' : 'bg-gray-100 text-gray-500'}`}>2</span>
               <div>
                 <strong className={`block ${activeAlgo === 'content' ? 'text-blue-900' : 'text-gray-700'}`}>Content-Based Filtering (Genres)</strong>
-                <span className="text-gray-600 block mt-1"><strong>Reason:</strong> User behavior not yet learnable (Below 25th percentile).</span>
-                <span className="text-gray-600 block"><strong>Action:</strong> Uses TF-IDF on genre similarity to handle cold start.</span>
+                <span className="text-gray-600 block mt-1"><strong>Reason:</strong> Backend selects this when the user has 6-19 interactions.</span>
+                <span className="text-gray-600 block"><strong>Action:</strong> Uses TF-IDF on genre similarity to handle sparse history.</span>
               </div>
             </li>
 
             <li className={`flex items-start p-3 rounded-lg border ${activeAlgo === 'svd' ? 'bg-purple-50/50 border-purple-200' : 'border-transparent opacity-60'}`}>
-              <span className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center mr-3 mt-0.5 font-bold ${activeAlgo === 'svd' ? 'bg-purple-100 text-purple-600' : 'bg-gray-100 text-gray-500'}`}>2</span>
+              <span className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center mr-3 mt-0.5 font-bold ${activeAlgo === 'svd' ? 'bg-purple-100 text-purple-600' : 'bg-gray-100 text-gray-500'}`}>3</span>
               <div>
                 <strong className={`block ${activeAlgo === 'svd' ? 'text-purple-900' : 'text-gray-700'}`}>Matrix Factorization (TruncatedSVD)</strong>
-                <span className="text-gray-600 block mt-1"><strong>Reason:</strong> Enough data (~15-20 minimum) for reliable decomposition, outperforming simple cosine.</span>
+                <span className="text-gray-600 block mt-1"><strong>Reason:</strong> Backend selects this for users with 20-69 interactions.</span>
                 <span className="text-gray-600 block"><strong>Action:</strong> Discovers hidden preference patterns and latent factors.</span>
               </div>
             </li>
 
             <li className={`flex items-start p-3 rounded-lg border ${activeAlgo === 'collaborative' ? 'bg-teal-50/50 border-teal-200' : 'border-transparent opacity-60'}`}>
-              <span className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center mr-3 mt-0.5 font-bold ${activeAlgo === 'collaborative' ? 'bg-teal-100 text-teal-600' : 'bg-gray-100 text-gray-500'}`}>3</span>
+              <span className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center mr-3 mt-0.5 font-bold ${activeAlgo === 'collaborative' ? 'bg-teal-100 text-teal-600' : 'bg-gray-100 text-gray-500'}`}>4</span>
               <div>
                 <strong className={`block ${activeAlgo === 'collaborative' ? 'text-teal-900' : 'text-gray-700'}`}>Collaborative Filtering (Cosine)</strong>
-                <span className="text-gray-600 block mt-1"><strong>Reason:</strong> Rich user history (>75th percentile). SVD has diminishing returns beyond this point.</span>
+                <span className="text-gray-600 block mt-1"><strong>Reason:</strong> Backend selects this when the user has 70 or more interactions.</span>
                 <span className="text-gray-600 block"><strong>Action:</strong> Leverages exact user similarity to reliably find "people like you".</span>
               </div>
             </li>
@@ -106,20 +128,25 @@ export default function AlgorithmInsights({ interactionCount }) {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
+                <tr className={getRowClass('demographic')}>
+                  <td className={getCellClass('demographic')}>Demographic Cold Start</td>
+                  <td className={getCellClass('demographic', true)}>N/A</td>
+                  <td className={getCellClass('demographic', true)}>N/A</td>
+                </tr>
                 <tr className={getRowClass('content')}>
                   <td className={getCellClass('content')}>Content-Based (TF-IDF)</td>
                   <td className={getCellClass('content', true)}>0.924</td>
                   <td className={getCellClass('content', true)}>0.741</td>
                 </tr>
-                <tr className={getRowClass('collaborative')}>
-                  <td className={getCellClass('collaborative')}>Collaborative (Cosine KNN)</td>
-                  <td className={getCellClass('collaborative', true)}>0.891</td>
-                  <td className={getCellClass('collaborative', true)}>0.702</td>
-                </tr>
                 <tr className={getRowClass('svd')}>
                   <td className={getCellClass('svd')}>Hybrid (TruncatedSVD)</td>
                   <td className={getCellClass('svd', true)}>0.835</td>
                   <td className={getCellClass('svd', true)}>0.658</td>
+                </tr>
+                <tr className={getRowClass('collaborative')}>
+                  <td className={getCellClass('collaborative')}>Collaborative (Cosine KNN)</td>
+                  <td className={getCellClass('collaborative', true)}>0.891</td>
+                  <td className={getCellClass('collaborative', true)}>0.702</td>
                 </tr>
               </tbody>
             </table>

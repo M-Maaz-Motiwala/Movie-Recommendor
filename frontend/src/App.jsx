@@ -11,6 +11,7 @@ export default function App() {
   const [selected, setSelected] = useState(null);
   const [recs, setRecs] = useState([]);
   const [interactionCount, setInteractionCount] = useState(null);
+  const [strategy, setStrategy] = useState(null);
   const [userInteractions, setUserInteractions] = useState([]);
   const [loading, setLoading] = useState(false);
 
@@ -25,9 +26,11 @@ export default function App() {
       const res = await api.get(`/recommend/${userId}`);
       setRecs(res.data.recommendations);
       setInteractionCount(res.data.interaction_count || 0);
+      setStrategy(res.data.strategy || null);
     } catch (e) {
       setRecs([]);
       setInteractionCount(0);
+      setStrategy(null);
     }
     setLoading(false);
   };
@@ -76,6 +79,7 @@ export default function App() {
                 setSelected(u);
                 setRecs([]); // clear previous recs on user change
                 setInteractionCount(null);
+                setStrategy(null);
                 fetchUserInteractions(u?.user_id);
               }} 
               onGet={() => fetchRecs(selected?.user_id)} 
@@ -105,7 +109,7 @@ export default function App() {
             }}
           />
           
-          <AlgorithmInsights interactionCount={interactionCount} />
+          <AlgorithmInsights interactionCount={interactionCount} strategy={strategy} />
         </div>
       </main>
     </div>
